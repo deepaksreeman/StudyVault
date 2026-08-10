@@ -1435,24 +1435,50 @@ function formatText(command) {
 // MANUAL HIGHLIGHT
 // ==========================================
 
+// ==========================================
+// MANUAL HIGHLIGHT
+// ==========================================
+
 function highlightText() {
 
     removeSearchHighlights();
 
+    const selection =
+        window.getSelection();
 
-    document.execCommand(
-        "hiliteColor",
-        false,
-        "yellow"
+    if (
+        !selection.rangeCount ||
+        selection.isCollapsed
+    ) {
+        return;
+    }
+
+    const range =
+        selection.getRangeAt(0);
+
+    const span =
+        document.createElement("span");
+
+    span.style.backgroundColor =
+        "yellow";
+
+    span.appendChild(
+        range.extractContents()
     );
 
+    range.insertNode(span);
+
+    // Move cursor outside the highlighted text
+    range.setStartAfter(span);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
 
     noteContent.focus();
 
-
     saveCurrentNote();
 }
-
 
 // ==========================================
 // DARK MODE
