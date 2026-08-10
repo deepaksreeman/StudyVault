@@ -1452,14 +1452,12 @@ function highlightText() {
 
     const range = selection.getRangeAt(0);
 
-    const selectedText =
-        range.toString();
+    const selectedText = range.toString();
 
     if (!selectedText) {
         return;
     }
 
-    // Check whether the selected text is already highlighted
     let container = range.commonAncestorContainer;
 
     if (container.nodeType === Node.TEXT_NODE) {
@@ -1467,19 +1465,15 @@ function highlightText() {
     }
 
     const existingHighlight =
-        container.closest(
-            ".manual-highlight"
-        );
+        container.closest(".manual-highlight");
 
-    // If already highlighted → remove highlight
+    // UNHIGHLIGHT
     if (existingHighlight) {
 
         const parent =
             existingHighlight.parentNode;
 
-        while (
-            existingHighlight.firstChild
-        ) {
+        while (existingHighlight.firstChild) {
 
             parent.insertBefore(
                 existingHighlight.firstChild,
@@ -1493,9 +1487,11 @@ function highlightText() {
 
         noteContent.normalize();
 
-    } else {
+    }
 
-        // Create a new highlight
+    // HIGHLIGHT
+    else {
+
         const span =
             document.createElement("span");
 
@@ -1503,7 +1499,10 @@ function highlightText() {
             "manual-highlight";
 
         span.style.backgroundColor =
-            "yellow";
+            "#ffe066";
+
+        span.style.color =
+            "#111";
 
         span.appendChild(
             range.extractContents()
@@ -1511,12 +1510,17 @@ function highlightText() {
 
         range.insertNode(span);
 
-        // Put cursor after highlighted text
-        range.setStartAfter(span);
-        range.collapse(true);
+        // IMPORTANT:
+        // Move the cursor completely outside
+        // the highlighted span.
+        const newRange =
+            document.createRange();
+
+        newRange.setStartAfter(span);
+        newRange.collapse(true);
 
         selection.removeAllRanges();
-        selection.addRange(range);
+        selection.addRange(newRange);
     }
 
     noteContent.focus();
