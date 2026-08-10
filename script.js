@@ -1441,10 +1441,7 @@ function formatText(command) {
 
 function highlightText() {
 
-    removeSearchHighlights();
-
-    const selection =
-        window.getSelection();
+    const selection = window.getSelection();
 
     if (
         !selection.rangeCount ||
@@ -1453,27 +1450,74 @@ function highlightText() {
         return;
     }
 
-    const range =
-        selection.getRangeAt(0);
+    const range = selection.getRangeAt(0);
 
-    const span =
-        document.createElement("span");
+    const selectedText =
+        range.toString();
 
-    span.style.backgroundColor =
-        "yellow";
+    if (!selectedText) {
+        return;
+    }
 
-    span.appendChild(
-        range.extractContents()
-    );
+    // Check whether the selected text is already highlighted
+    let container = range.commonAncestorContainer;
 
-    range.insertNode(span);
+    if (container.nodeType === Node.TEXT_NODE) {
+        container = container.parentElement;
+    }
 
-    // Move cursor outside the highlighted text
-    range.setStartAfter(span);
-    range.collapse(true);
+    const existingHighlight =
+        container.closest(
+            ".manual-highlight"
+        );
 
-    selection.removeAllRanges();
-    selection.addRange(range);
+    // If already highlighted → remove highlight
+    if (existingHighlight) {
+
+        const parent =
+            existingHighlight.parentNode;
+
+        while (
+            existingHighlight.firstChild
+        ) {
+
+            parent.insertBefore(
+                existingHighlight.firstChild,
+                existingHighlight
+            );
+        }
+
+        parent.removeChild(
+            existingHighlight
+        );
+
+        noteContent.normalize();
+
+    } else {
+
+        // Create a new highlight
+        const span =
+            document.createElement("span");
+
+        span.className =
+            "manual-highlight";
+
+        span.style.backgroundColor =
+            "yellow";
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+        range.insertNode(span);
+
+        // Put cursor after highlighted text
+        range.setStartAfter(span);
+        range.collapse(true);
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
 
     noteContent.focus();
 
